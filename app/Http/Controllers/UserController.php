@@ -10,6 +10,7 @@ use Carbon\Carbon;
 
 class UserController extends Controller
 {
+    // -------------------- CRUD cơ bản --------------------
     public function index()
     {
         $users = User::orderBy('created_at', 'desc')->paginate(10);
@@ -87,6 +88,7 @@ class UserController extends Controller
         ]);
     }
 
+    // -------------------- OTP & Quên mật khẩu --------------------
     public function sendOtp(Request $request)
     {
         $request->validate([
@@ -95,16 +97,17 @@ class UserController extends Controller
 
         $user = User::where('email', $request->email)->first();
 
+        // Tạo OTP 6 chữ số
         $otp = rand(100000, 999999);
-
         $user->otp_code = $otp;
         $user->otp_expires_at = Carbon::now()->addMinutes(5);
         $user->save();
 
-        // Gửi email
+        // Gửi email OTP
         Mail::raw("Mã OTP của bạn là: {$otp}. Mã này hết hạn sau 5 phút.", function ($message) use ($user) {
             $message->to($user->email)
-                ->subject('Mã OTP xác thực quên mật khẩu');
+                    ->subject('Mã OTP xác thực quên mật khẩu')
+                    ->from(env('MAIL_FROM_ADDRESS'), env('MAIL_FROM_NAME')); // đảm bảo from hợp lệ
         });
 
         return response()->json(['message' => 'Đã gửi mã OTP đến email của bạn.']);
@@ -119,11 +122,7 @@ class UserController extends Controller
 
         $user = User::where('email', $request->email)->first();
 
-        if (
-            !$user->otp_code ||
-            $user->otp_code !== $request->otp_code ||
-            Carbon::now()->greaterThan($user->otp_expires_at)
-        ) {
+        if (!$user->otp_code || $user->otp_code !== $request->otp_code || Carbon::now()->greaterThan($user->otp_expires_at)) {
             return response()->json(['status' => 'error', 'message' => 'Mã OTP không hợp lệ hoặc đã hết hạn!'], 400);
         }
 
@@ -133,18 +132,14 @@ class UserController extends Controller
     public function resetPassword(Request $request)
     {
         $request->validate([
-            'email'    => 'required|email|exists:users,email',
-            'otp_code' => 'required|string',
-            'password' => 'required|string|min:6|confirmed',
+            'email'                 => 'required|email|exists:users,email',
+            'otp_code'              => 'required|string',
+            'password'              => 'required|string|min:6|confirmed', // yêu cầu password_confirmation
         ]);
 
         $user = User::where('email', $request->email)->first();
 
-        if (
-            !$user->otp_code ||
-            $user->otp_code !== $request->otp_code ||
-            Carbon::now()->greaterThan($user->otp_expires_at)
-        ) {
+        if (!$user->otp_code || $user->otp_code !== $request->otp_code || Carbon::now()->greaterThan($user->otp_expires_at)) {
             return response()->json(['message' => 'Mã OTP không hợp lệ hoặc đã hết hạn.'], 400);
         }
 

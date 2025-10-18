@@ -172,4 +172,6 @@ class UserController extends Controller
 
         return response()->json(['message' => 'Đặt lại mật khẩu thành công!']);
     }
+
+    //11    11  
 }

@@ -11,7 +11,7 @@ Route::get('/run-seeder', function () {
     try {
         // Chạy seeder cụ thể
         Artisan::call('db:seed', [
-            '--force' => true, // Bắt buộc chạy
+            '--force' => true,
         ]);
 
         return "Seeder chạy thành công!";

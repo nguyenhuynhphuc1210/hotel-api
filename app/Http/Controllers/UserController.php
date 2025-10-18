@@ -14,7 +14,7 @@ class UserController extends Controller
 
     public function index()
     {
-        $users = User::paginate(10);
+        $users = User::orderBy('created_at', 'desc')->paginate(10);
         return response()->json($users);
     }
 
@@ -89,11 +89,6 @@ class UserController extends Controller
         ]);
     }
 
-    // -------------------- QUÊN MẬT KHẨU (3 BƯỚC) --------------------
-
-    /**
-     * B1: Gửi OTP về email
-     */
     public function sendOtp(Request $request)
     {
         $request->validate([
@@ -112,7 +107,7 @@ class UserController extends Controller
         // Gửi email
         Mail::raw("Mã OTP của bạn là: {$otp}. Mã này hết hạn sau 5 phút.", function ($message) use ($user) {
             $message->to($user->email)
-                    ->subject('Mã OTP xác thực quên mật khẩu');
+                ->subject('Mã OTP xác thực quên mật khẩu');
         });
 
         return response()->json(['message' => 'Đã gửi mã OTP đến email của bạn.']);
@@ -142,9 +137,6 @@ class UserController extends Controller
         return response()->json(['status' => 'success', 'message' => 'OTP hợp lệ!']);
     }
 
-    /**
-     * B3: Đặt lại mật khẩu sau khi xác minh OTP
-     */
     public function resetPassword(Request $request)
     {
         $request->validate([
@@ -172,6 +164,4 @@ class UserController extends Controller
 
         return response()->json(['message' => 'Đặt lại mật khẩu thành công!']);
     }
-
-    //11    11  
 }

@@ -5,16 +5,25 @@ namespace App\Http\Controllers;
 use App\Models\Room;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Storage;
+use Cloudinary\Cloudinary;
 use Exception;
 
 class RoomController extends Controller
 {
+    protected Cloudinary $cloudinary;
+
+    public function __construct()
+    {
+        // Khởi tạo Cloudinary từ CLOUDINARY_URL
+        $this->cloudinary = new Cloudinary(env('CLOUDINARY_URL'));
+    }
+
     /**
      * Hiển thị danh sách tất cả các phòng
      */
     public function index(Request $request)
     {
-        $query = Room::with('images');
+        $query = Room::with('images')->orderBy('created_at', 'desc');
 
         if ($request->filled('type')) {
             $query->where('type', $request->type);
@@ -50,9 +59,13 @@ class RoomController extends Controller
         if ($request->hasFile('images')) {
             foreach ($request->file('images') as $image) {
                 try {
-                    // Upload lên Cloudinary, dùng putFile thay vì fopen
+                    // Upload ảnh lên Cloudinary
                     $path = Storage::disk('cloudinary')->putFile('rooms', $image);
-                    $room->images()->create(['image_path' => $path]);
+
+                    // Chuyển public ID thành URL đầy đủ
+                    $url = $this->cloudinary->image($path)->toUrl();
+
+                    $room->images()->create(['image_path' => $url]);
                 } catch (Exception $e) {
                     return response()->json([
                         'success' => false,
@@ -92,7 +105,7 @@ class RoomController extends Controller
 
         $room->update($request->only(['room_number', 'type', 'price', 'status']));
 
-        // Chỉ xoá ảnh cũ ở database, không xoá Cloudinary
+        // Xóa ảnh cũ trong DB
         if ($request->filled('deleted_images')) {
             $room->images()->whereIn('id', $request->deleted_images)->delete();
         }
@@ -102,7 +115,9 @@ class RoomController extends Controller
             foreach ($request->file('new_images') as $image) {
                 try {
                     $path = Storage::disk('cloudinary')->putFile('rooms', $image);
-                    $room->images()->create(['image_path' => $path]);
+                    $url = $this->cloudinary->image($path)->toUrl();
+
+                    $room->images()->create(['image_path' => $url]);
                 } catch (Exception $e) {
                     return response()->json([
                         'success' => false,
@@ -121,7 +136,6 @@ class RoomController extends Controller
      */
     public function destroy(Room $room)
     {
-        // Xóa tất cả ảnh trong DB nhưng giữ file trên Cloudinary
         $room->images()->delete();
         $room->delete();
 

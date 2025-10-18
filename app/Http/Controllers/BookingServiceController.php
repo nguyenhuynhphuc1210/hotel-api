@@ -15,6 +15,7 @@ class BookingServiceController extends Controller
     public function index()
     {
         $bookingServices = BookingService::with(['booking', 'service'])
+        ->orderBy('created_at', 'desc')
         ->paginate(10);
 
     return response()->json($bookingServices);

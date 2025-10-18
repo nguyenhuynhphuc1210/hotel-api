@@ -16,6 +16,7 @@ class InvoiceController extends Controller
     public function index()
     {
         $invoices = Invoice::with('booking.customer', 'booking.room')
+        ->orderBy('created_at', 'desc')
         ->paginate(10); // mỗi trang 10 hóa đơn
 
     // Thêm deposit_amount vào từng invoice trong trang hiện tại

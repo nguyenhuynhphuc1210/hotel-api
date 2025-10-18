@@ -10,8 +10,6 @@ use Carbon\Carbon;
 
 class UserController extends Controller
 {
-    // -------------------- CRUD CƠ BẢN --------------------
-
     public function index()
     {
         $users = User::orderBy('created_at', 'desc')->paginate(10);
@@ -97,11 +95,10 @@ class UserController extends Controller
 
         $user = User::where('email', $request->email)->first();
 
-        // Tạo mã OTP ngẫu nhiên 6 chữ số
         $otp = rand(100000, 999999);
 
         $user->otp_code = $otp;
-        $user->otp_expires_at = Carbon::now()->addMinutes(5); // Hết hạn sau 5 phút
+        $user->otp_expires_at = Carbon::now()->addMinutes(5);
         $user->save();
 
         // Gửi email
@@ -113,9 +110,6 @@ class UserController extends Controller
         return response()->json(['message' => 'Đã gửi mã OTP đến email của bạn.']);
     }
 
-    /**
-     * B2: Xác thực OTP
-     */
     public function verifyOtp(Request $request)
     {
         $request->validate([
@@ -125,7 +119,6 @@ class UserController extends Controller
 
         $user = User::where('email', $request->email)->first();
 
-        // Kiểm tra OTP hợp lệ
         if (
             !$user->otp_code ||
             $user->otp_code !== $request->otp_code ||
@@ -142,12 +135,11 @@ class UserController extends Controller
         $request->validate([
             'email'    => 'required|email|exists:users,email',
             'otp_code' => 'required|string',
-            'password' => 'required|string|min:6|confirmed', // yêu cầu có password_confirmation
+            'password' => 'required|string|min:6|confirmed',
         ]);
 
         $user = User::where('email', $request->email)->first();
 
-        // Kiểm tra OTP lại lần nữa cho an toàn
         if (
             !$user->otp_code ||
             $user->otp_code !== $request->otp_code ||
@@ -156,7 +148,6 @@ class UserController extends Controller
             return response()->json(['message' => 'Mã OTP không hợp lệ hoặc đã hết hạn.'], 400);
         }
 
-        // Đặt lại mật khẩu mới
         $user->password = Hash::make($request->password);
         $user->otp_code = null;
         $user->otp_expires_at = null;

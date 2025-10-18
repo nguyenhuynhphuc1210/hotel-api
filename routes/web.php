@@ -1,21 +1,16 @@
 <?php
 
 use Illuminate\Support\Facades\Route;
-use Illuminate\Support\Facades\Artisan;
+use Illuminate\Support\Facades\Mail;
 
 Route::get('/', function () {
     return view('welcome');
 });
 
-Route::get('/run-seeder', function () {
-    try {
-        // Chạy seeder cụ thể
-        Artisan::call('db:seed', [
-            '--force' => true,
-        ]);
-
-        return "Seeder chạy thành công!";
-    } catch (\Exception $e) {
-        return "Lỗi khi chạy seeder: " . $e->getMessage();
-    }
+Route::get('/test-mail', function() {
+    Mail::raw('Test gửi email từ Laravel', function($message){
+        $message->to('nguyenhuynhphuc1210@gmail.com')
+                ->subject('Test Email Laravel');
+    });
+    return 'Đã gửi thử email!';
 });

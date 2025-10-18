@@ -7,10 +7,15 @@ Route::get('/', function () {
     return view('welcome');
 });
 
-Route::get('/test-mail', function() {
-    Mail::raw('Test gửi email từ Laravel', function($message){
-        $message->to('nguyenhuynhphuc1210@gmail.com')
-                ->subject('Test Email Laravel');
-    });
-    return 'Đã gửi thử email!';
+Route::get('/test-mail', function () {
+    try {
+        Mail::raw('Email test từ Laravel trên Render', function ($message) {
+            $message->to('nguyenhuynhphuc1210@gmail.com')
+                    ->subject('Test Email Laravel Render');
+        });
+
+        return 'Email đã gửi thành công!';
+    } catch (\Exception $e) {
+        return 'Lỗi gửi email: ' . $e->getMessage();
+    }
 });

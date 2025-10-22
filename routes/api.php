@@ -11,7 +11,8 @@ use App\Http\Controllers\{
     DashboardController,
     RoomImageController,
     ContactController,
-    AuthController
+    AuthController,
+    ReviewController
 };
 
 // ------------------ PUBLIC ROUTES (không cần login) ------------------
@@ -40,6 +41,7 @@ Route::post('/booking-services', [BookingServiceController::class, 'store']);
 
 // ------------------ PROTECTED ROUTES (cần login) ------------------
 Route::middleware('auth:sanctum')->group(function () {
+    Route::post('/my-bookings/{booking}/review', [ReviewController::class, 'store']);
     Route::post('/logout', [AuthController::class, 'logout']);
     Route::get('/me', [AuthController::class, 'me']);
     Route::get('/my-bookings', [BookingController::class, 'myBookings']);

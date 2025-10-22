@@ -37,7 +37,7 @@ class RoomController extends Controller
             return response()->json($query->get());
         }
 
-        return response()->json($query->paginate(9));
+        return response()->json($query->paginate(12));
     }
 
     /**

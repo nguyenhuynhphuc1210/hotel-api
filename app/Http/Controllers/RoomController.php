@@ -149,4 +149,21 @@ class RoomController extends Controller
     {
         return response()->json(Room::with('images')->get());
     }
+
+    public function getReviews($id)
+    {
+        $room = Room::with(['reviews.user'])->findOrFail($id);
+
+        return response()->json([
+            'reviews' => $room->reviews->map(function ($review) {
+                return [
+                    'user' => $review->user->name ?? 'Ẩn danh',
+                    'rating' => $review->rating,
+                    'comment' => $review->comment,
+                    'created_at' => $review->created_at->format('d/m/Y'),
+                ];
+            }),
+            'average_rating' => round($room->reviews->avg('rating'), 1),
+        ]);
+    }
 }

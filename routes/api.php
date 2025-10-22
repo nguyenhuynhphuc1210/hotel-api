@@ -29,13 +29,12 @@ Route::get('/bookings/all', [BookingController::class, 'allBookings']);
 Route::get('/rooms', [RoomController::class, 'index']);
 Route::get('/rooms/{room}', [RoomController::class, 'show']);
 Route::get('/rooms/{room}/images', [RoomImageController::class, 'index']);
+Route::get('/rooms/{id}/reviews', [RoomController::class, 'getReviews']);
 
 
-// Xem dịch vụ
 Route::get('/services', [ServiceController::class, 'index']);
 Route::get('/services/{service}', [ServiceController::class, 'show']);
 
-// Đặt phòng / dịch vụ (không cần login)
 Route::post('/bookings', [BookingController::class, 'store']);
 Route::post('/booking-services', [BookingServiceController::class, 'store']);
 

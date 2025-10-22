@@ -157,7 +157,7 @@ class RoomController extends Controller
         return response()->json([
             'reviews' => $room->reviews->map(function ($review) {
                 return [
-                    'user' => $review->user->name ?? 'Ẩn danh',
+                    'user' => $review->user->fullname ?? 'Ẩn danh',
                     'rating' => $review->rating,
                     'comment' => $review->comment,
                     'created_at' => $review->created_at->format('d/m/Y'),

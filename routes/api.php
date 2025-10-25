@@ -1,4 +1,5 @@
 <?php
+
 use Illuminate\Support\Facades\Route;
 use App\Http\Controllers\{
     UserController,
@@ -12,10 +13,15 @@ use App\Http\Controllers\{
     RoomImageController,
     ContactController,
     AuthController,
-    ReviewController
+    ReviewController,
+    PaymentController
+
 };
 
 // ------------------ PUBLIC ROUTES (không cần login) ------------------
+Route::post('/payment/momo', [PaymentController::class, 'momoPayment']);
+Route::post('/payment/momo/callback', [PaymentController::class, 'momoCallback']);
+
 Route::post('/register', [AuthController::class, 'register']);
 Route::post('/login', [AuthController::class, 'login']);
 Route::post('/forgot-password', [UserController::class, 'sendOtp']);

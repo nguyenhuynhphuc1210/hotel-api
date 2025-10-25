@@ -22,6 +22,9 @@ use App\Http\Controllers\{
 Route::post('/payment/momo', [PaymentController::class, 'momoPayment']);
 Route::post('/payment/momo/callback', [PaymentController::class, 'momoCallback']);
 
+Route::post('/payment/vnpay', [PaymentController::class, 'createVNPay']);
+Route::get('/payment/vnpay-return', [PaymentController::class, 'vnpayReturn']);
+
 Route::post('/register', [AuthController::class, 'register']);
 Route::post('/login', [AuthController::class, 'login']);
 Route::post('/forgot-password', [UserController::class, 'sendOtp']);

@@ -71,37 +71,39 @@ class PaymentController extends Controller
     // ✅ Nhận callback từ MoMo sau khi thanh toán
     public function momoCallback(Request $request)
     {
-        // Ghi log mọi thứ để kiểm tra
-        Log::info('MoMo callback raw:', [$request->getContent()]);
-        Log::info('MoMo callback parsed:', $request->all());
+        Log::info('--- CALLBACK START ---');
+        Log::info('Raw content:', [$request->getContent()]);
+        Log::info('Parsed data:', $request->all());
 
-        // Lấy dữ liệu từ MoMo
         $data = $request->all();
+        if (empty($data)) parse_str($request->getContent(), $data);
+        Log::info('Final data:', $data);
 
-        // Một số trường hợp MoMo gửi x-www-form-urlencoded → cần parse thủ công
-        if (empty($data)) {
-            parse_str($request->getContent(), $data);
-        }
-
-        Log::info('MoMo callback final:', $data);
-
-        // Giải mã extraData
         $extraData = json_decode(base64_decode($data['extraData'] ?? ''), true);
+        Log::info('Decoded extraData:', $extraData);
 
-        // ✅ Nếu thanh toán thành công
-        if (($data['resultCode'] ?? null) == 0 && $extraData) {
-            Log::info('Creating booking:', $extraData);
+        $resultCode = $data['resultCode'] ?? null;
+        Log::info('ResultCode:', [$resultCode]);
 
-            Booking::create([
-                'room_id' => $extraData['room_id'],
-                'customer_id' => $extraData['customer_id'],
-                'checkin_date' => $extraData['checkin_date'],
-                'checkout_date' => $extraData['checkout_date'],
-                'status' => 'deposit_paid',
-                'total_price' => $extraData['total_price'],
-                'deposit_amount' => $extraData['deposit_amount'],
-                'remaining_amount' => $extraData['total_price'] - $extraData['deposit_amount'],
-            ]);
+        if ($resultCode == 0 && $extraData) {
+            try {
+                Log::info('Creating booking record...', $extraData);
+
+                Booking::create([
+                    'room_id' => $extraData['room_id'] ?? null,
+                    'customer_id' => $extraData['customer_id'] ?? null,
+                    'checkin_date' => $extraData['checkin_date'] ?? null,
+                    'checkout_date' => $extraData['checkout_date'] ?? null,
+                    'status' => 'deposit_paid',
+                    'total_price' => $extraData['total_price'] ?? 0,
+                    'deposit_amount' => $extraData['deposit_amount'] ?? 0,
+                    'remaining_amount' => ($extraData['total_price'] ?? 0) - ($extraData['deposit_amount'] ?? 0),
+                ]);
+
+                Log::info('Booking created successfully!');
+            } catch (\Exception $e) {
+                Log::error('Booking create failed:', [$e->getMessage()]);
+            }
         } else {
             Log::warning('MoMo callback ignored: resultCode != 0 or no extraData', $data);
         }

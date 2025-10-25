@@ -71,13 +71,27 @@ class PaymentController extends Controller
     // ✅ Nhận callback từ MoMo sau khi thanh toán
     public function momoCallback(Request $request)
     {
-        Log::info('MoMo callback:', $request->all());
+        // Ghi log mọi thứ để kiểm tra
+        Log::info('MoMo callback raw:', [$request->getContent()]);
+        Log::info('MoMo callback parsed:', $request->all());
+
+        // Lấy dữ liệu từ MoMo
+        $data = $request->all();
+
+        // Một số trường hợp MoMo gửi x-www-form-urlencoded → cần parse thủ công
+        if (empty($data)) {
+            parse_str($request->getContent(), $data);
+        }
+
+        Log::info('MoMo callback final:', $data);
 
         // Giải mã extraData
-        $extraData = json_decode(base64_decode($request->extraData ?? ''), true);
+        $extraData = json_decode(base64_decode($data['extraData'] ?? ''), true);
 
-        // Nếu thanh toán thành công (resultCode = 0)
-        if ($request->resultCode == 0 && $extraData) {
+        // ✅ Nếu thanh toán thành công
+        if (($data['resultCode'] ?? null) == 0 && $extraData) {
+            Log::info('Creating booking:', $extraData);
+
             Booking::create([
                 'room_id' => $extraData['room_id'],
                 'customer_id' => $extraData['customer_id'],
@@ -88,6 +102,8 @@ class PaymentController extends Controller
                 'deposit_amount' => $extraData['deposit_amount'],
                 'remaining_amount' => $extraData['total_price'] - $extraData['deposit_amount'],
             ]);
+        } else {
+            Log::warning('MoMo callback ignored: resultCode != 0 or no extraData', $data);
         }
 
         return response()->json(['message' => 'Callback processed']);

@@ -121,7 +121,6 @@ class InvoiceController extends Controller
 
     public function pay(Request $request, Invoice $invoice)
     {
-        // Nếu đã thanh toán rồi thì trả về
         if ($invoice->status === 'paid') {
             return response()->json([
                 'message' => 'Hóa đơn đã được thanh toán'

@@ -19,11 +19,16 @@ use App\Http\Controllers\{
 };
 
 // ------------------ PUBLIC ROUTES (không cần login) ------------------
-Route::post('/payment/momo', [PaymentController::class, 'momoPayment']);
-Route::post('/payment/momo/callback', [PaymentController::class, 'momoCallback']);
+Route::post('/payment/momo', [PaymentController::class, 'createMoMo']);
+Route::post('/payment/momo/return', [PaymentController::class, 'momoReturn']);
+Route::post('/payment/momo/pay-remaining', [PaymentController::class, 'payRemainingMoMo']);
+Route::post('/payment/momo/remaining-return', [PaymentController::class, 'momoRemainingReturn']);
+
 
 Route::post('/payment/vnpay', [PaymentController::class, 'createVNPay']);
-Route::get('/payment/vnpay-return', [PaymentController::class, 'vnpayReturn']);
+Route::post('/payment/vnpay/return', [PaymentController::class, 'vnpayReturn']);
+Route::post('/payment/vnpay/pay-remaining', [PaymentController::class, 'payRemainingVNPay']);
+Route::post('/payment/vnpay/remaining-return', [PaymentController::class, 'vnpayRemainingReturn']);
 
 Route::post('/register', [AuthController::class, 'register']);
 Route::post('/login', [AuthController::class, 'login']);
@@ -58,6 +63,7 @@ Route::middleware('auth:sanctum')->group(function () {
     Route::patch('/invoices/{invoice}/pay', [InvoiceController::class, 'pay']);
     Route::patch('/change-password', [AuthController::class, 'changePassword']);
     Route::patch('/users/{user}/update-profile', [UserController::class, 'updateProfile']);
+    Route::apiResource('customers', CustomerController::class);
 
 
     // ADMIN ONLY (role = 0)
@@ -69,7 +75,7 @@ Route::middleware('auth:sanctum')->group(function () {
     // STAFF + ADMIN (role = 0,1)
     Route::middleware('role:0,1')->group(function () {
         Route::put('/bookings/{id}/confirm', [BookingController::class, 'confirm']);
-        Route::apiResource('customers', CustomerController::class);
+        
         Route::apiResource('bookings', BookingController::class)->except(['store']);
         Route::apiResource('booking-services', BookingServiceController::class)->except(['store']);
         Route::apiResource('invoices', InvoiceController::class);

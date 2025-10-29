@@ -18,12 +18,28 @@ class CustomerController extends Controller
     {
         $request->validate([
             'fullname' => 'required|string|max:255',
-            'phone'    => 'required|string|max:20|unique:customers',
-            'email'    => 'required|email|unique:customers',
-            'cccd'     => 'required|string|max:20|unique:customers',
+            'phone'    => 'required|string|max:20',
+            'email'    => 'required|email',
+            'cccd'     => 'required|string|max:20',
         ]);
 
-        $customer = Customer::create($request->all());
+        // Kiểm tra khách hàng tồn tại
+        $existing = Customer::where('phone', $request->phone)
+            ->orWhere('email', $request->email)
+            ->orWhere('cccd', $request->cccd)
+            ->first();
+
+        if ($existing) {
+            return response()->json($existing, 200);
+        }
+
+        // Tạo mới
+        $customer = Customer::create($request->only([
+            'fullname',
+            'phone',
+            'email',
+            'cccd'
+        ]));
 
         return response()->json($customer, 201);
     }

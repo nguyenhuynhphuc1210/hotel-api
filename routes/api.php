@@ -1,5 +1,7 @@
 <?php
 
+use Illuminate\Http\Request;
+use Illuminate\Support\Facades\Http;
 use Illuminate\Support\Facades\Route;
 use App\Http\Controllers\{
     UserController,
@@ -17,6 +19,26 @@ use App\Http\Controllers\{
     PaymentController
 
 };
+
+Route::post('/chat-ai', function (Request $request) {
+    $message = $request->input('message');
+
+    // Gửi tới webhook n8n
+    $response = Http::post('https://nguyenhuynhphuc.app.n8n.cloud/webhook/chat-ai', [
+        'chatInput' => $message
+    ]);
+
+    // Trả kết quả về frontend
+    if ($response->successful()) {
+        return response()->json([
+            'reply' => $response->json()['reply'] ?? 'Không có phản hồi từ AI'
+        ]);
+    } else {
+        return response()->json([
+            'reply' => 'Lỗi kết nối đến AI'
+        ], 500);
+    }
+});
 
 // ------------------ PUBLIC ROUTES (không cần login) ------------------
 Route::post('/payment/momo', [PaymentController::class, 'createMoMo']);
@@ -70,6 +92,7 @@ Route::middleware('auth:sanctum')->group(function () {
     Route::middleware('role:0')->group(function () {
         Route::apiResource('users', UserController::class);
         Route::get('dashboard', [DashboardController::class, 'index']);
+        Route::get('/dashboard/revenue', [DashboardController::class, 'revenue']);
     });
 
     // STAFF + ADMIN (role = 0,1)

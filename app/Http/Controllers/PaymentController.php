@@ -343,12 +343,14 @@ class PaymentController extends Controller
         }
 
         // 3️⃣ Chuẩn bị dữ liệu MoMo
-        $endpoint = env('MOMO_ENDPOINT'); // ví dụ: https://test-payment.momo.vn/gw_payment/transactionProcessor
+        $endpoint = env('MOMO_ENDPOINT');
         $partnerCode = env('MOMO_PARTNER_CODE');
         $accessKey = env('MOMO_ACCESS_KEY');
         $secretKey = env('MOMO_SECRET_KEY');
         $returnUrl = env('APP_URL_FRONTEND') . '/payment-success';
         $orderInfo = 'Đặt cọc phòng ID #' . $booking->id;
+
+        
         $amount = $request->amount; // số tiền cọc
         $orderId = $booking->id . '_' . time();
         $requestId = $booking->id . '_' . time();

@@ -24,7 +24,7 @@ Route::post('/chat-ai', function (Request $request) {
     $message = $request->input('message');
 
     // Gửi tới webhook n8n
-    $response = Http::timeout(60)->post('https://nguyenhuynhphuc.app.n8n.cloud/webhook/chat-ai', [
+    $response = Http::post('https://nguyenhuynhphuc.app.n8n.cloud/webhook/chat-ai', [
         'chatInput' => $message
     ]);
 

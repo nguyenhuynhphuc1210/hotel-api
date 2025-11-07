@@ -166,4 +166,21 @@ class RoomController extends Controller
             'average_rating' => round($room->reviews->avg('rating'), 1),
         ]);
     }
+
+    public function import(Request $request)
+    {
+        $rooms = $request->all();
+        foreach ($rooms as $r) {
+            Room::updateOrCreate(
+                ['room_number' => $r['room_number']],
+                [
+                    'type' => $r['type'],
+                    'price' => $r['price'],
+                    'status' => $r['status'] ?? 'available'
+                ]
+            );
+        }
+
+        return response()->json(['message' => 'Import thành công']);
+    }
 }

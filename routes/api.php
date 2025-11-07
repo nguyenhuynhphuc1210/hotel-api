@@ -104,12 +104,12 @@ Route::middleware('auth:sanctum')->group(function () {
         Route::apiResource('invoices', InvoiceController::class);
         Route::apiResource('services', ServiceController::class)->except(['index', 'show']);
         Route::apiResource('rooms', RoomController::class)->except(['index', 'show']);
-
         Route::post('rooms/{room}/images', [RoomImageController::class, 'store']);
         Route::delete('room-images/{roomImage}', [RoomImageController::class, 'destroy']);
-
         Route::get('/contacts', [ContactController::class, 'index']);
         Route::get('/contacts/{id}', [ContactController::class, 'show']);
         Route::delete('/contacts/{id}', [ContactController::class, 'destroy']);
+
+        Route::post('/rooms/import', [RoomController::class, 'import']);
     });
 });
